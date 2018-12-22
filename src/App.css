@@ -40,7 +40,7 @@ button:hover {
     background-color: whitesmoke;
     color: #282c34;
     margin: 20px;
-    width: 50%;
+    width: 80%;
     float: left;
 }
 
@@ -67,4 +67,14 @@ button:hover {
     background-color: darkred;
     border-radius: 50%;
     float: right;
+}
+
+.row{
+    width: 100%;
+    padding: 10px;
+}
+
+/*Text Input*/
+.form-group{
+    display: inline-block;
 }
