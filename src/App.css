@@ -17,12 +17,18 @@
 }
 
 #addPortfolioButton {
+    /* Green */
+    padding: 20px 30px;
+    margin: 20px;
+}
+
+button {
     background-color: darkolivegreen;
     /* Green */
     border: none;
     color: white;
-    padding: 20px 30px;
-    margin: 20px;
+    padding: 5px 10px;
+    margin: 5px;
     text-align: center;
     text-decoration: none;
     font-size: 18px;
@@ -30,6 +36,14 @@
 
 button:hover {
     filter: opacity(0.7);
+}
+
+.Disabled-Button{
+    opacity: 0.4;
+}
+
+.Disabled-Button:hover{
+    filter: none;
 }
 
 /*************
@@ -51,19 +65,16 @@ button:hover {
 
 /* Buttons */
 
-.Portfolio-Button {
-    background-color: darkolivegreen;
-    /* Green */
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    margin: 5px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 18px;
+#Portfolio-Board{
+    background-color: lightgray
 }
 
-.Exit {
+#Portfolio-Board th{
+    background-color: darkgray
+}
+
+
+.Exit-Button {
     background-color: darkred;
     border-radius: 50%;
     float: right;

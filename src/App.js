@@ -8,13 +8,18 @@ class App extends Component {
     super(props);
     this.state = {
       portfolioCount: 0,
-      portfolios: [],
+      portfolios: [
+        <Portfolio //TODO remove
+        key={-1}
+        id={"init"}
+        onClick={(id) => this.handleClicks(id)}
+      />
+      ],
       nextId: 0,
     }
   }
 
   handleClicks(id) {
-    //TODO add id back to 'pool?'
     var newPortfolioCount = this.state.portfolioCount;
     var newPortfolios = this.state.portfolios;
     const nextId = this.state.nextId;
