@@ -1,20 +1,44 @@
 import React, { Component } from 'react';
-//import logo from './logo.svg';
 import './App.css';
+
+class TextInput extends Component{
+  handleInput() {
+    var input = React.findDOMNode(this.refs.userInput)
+    this.props.saveInput(input.value)
+    input.value = ''
+  }
+  render() {
+    var label = this.props.label
+    return (
+      <div class="form-group">
+        <input 
+          type="text" 
+          class="form-control" 
+          id="input-{ label }" 
+          ref="userInput"
+         />
+        <button onClick={ this.handleInput }>Save</button>
+      </div>
+    )
+  }
+}
+
 
 class Portfolio extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      userIsEditing:false,
+      title:"Portfolio "+props.id
     }
   }
   render() {
     return (
       <div className="App-Portfolio">
-        <span className="Portfolio-Title">Potrfolio {this.props.id}</span>
+        <TextInput className="Portfolio-Title">Potrfolio {this.state.title}</TextInput>
         <button className="Portfolio-Button">Show in €</button>
         <button className="Portfolio-Button">Show in $</button>
-        <button className="Portfolio-Button Exit" onClick={this.props.onClick()}>X</button>
+        <button className="Portfolio-Button Exit" onClick={() => this.props.onClick(this.props.id)}>X</button>
       </div>
     );
   }
@@ -35,12 +59,19 @@ class App extends Component {
     const portfolioCount = this.state.portfolioCount;
     var newPortfolios = this.state.portfolios;
     const nextId = this.state.nextId;
-    console.log("HELLO");
+    console.log("Handling Clicks id:" + id + " newPortfolios length:" + newPortfolios.length);
+    var removed = false;
     for (var i = 0; i < newPortfolios.length; i++) {
-      if (newPortfolios[i].id === id) {
+      console.log(newPortfolios[i].props.id + ":" + id);
+      if (newPortfolios[i].props.id === id) {
         newPortfolios.splice(i, 1);
+        removed = true;
         break;
       }
+    }
+
+    if (!removed) {
+      console.log("Nothing Removed");
     }
 
     this.setState(
@@ -50,17 +81,6 @@ class App extends Component {
         nextId: nextId
       }
     );
-    // add to 'ToBeRemoved'
-
-    // var newPortfolios = this.state.portfolios;
-    // const portfolioCount = this.state.portfolioCount;
-    // newPortfolios = newPortfolios.splice(newPortfolios.indexOf(1), 1);
-    // this.setState(
-    //   {
-    //     portfolioCount: portfolioCount - 1,
-    //     portfolios: newPortfolios
-    //   }
-    // );
   }
 
   addPortfolio() {
@@ -68,8 +88,9 @@ class App extends Component {
     var newPortfolios = this.state.portfolios;
     const nextId = this.state.nextId;
     newPortfolios.push(<Portfolio
+      key={nextId}
       id={nextId}
-      onClick={ ()=> this.handleClicks()}
+      onClick={(id) => this.handleClicks(id)}
     />);
     this.setState({
       portfolioCount: portfolioCount + 1,
@@ -77,7 +98,7 @@ class App extends Component {
       nextId: nextId + 1,
     }
     );
-    console.log("Added");
+    console.log("Added Portfolio");
     // const newPortfolios = this.state.portfolios;
     // if (this.state.portfolioCount< 10) {
     // newPortfolios.push(<Portfolio
