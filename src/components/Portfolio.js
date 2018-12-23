@@ -99,7 +99,7 @@ class Portfolio extends Component {
                         const pricesPromise = this.fetchStockData(name);
                         pricesPromise.then(res => {
                             var stocks = res.data['Stock Quotes'];
-                            if (stocks === null) {
+                            if (stocks == null) {
                                 this.setErrorText("Error getting data for '" + name + "' from API, probably overused API-key");
                             } else {
                                 var prices = [];
@@ -227,7 +227,7 @@ class Portfolio extends Component {
             const pricesPromise = this.fetchStockData(terms);
             pricesPromise.then(res => {
                 var stocks = res.data['Stock Quotes'];
-                if (stocks === null) {
+                if (stocks == null) {
                     this.setErrorText("Error updating all stocks from API, probably overused API-key");
                 } else {
                     for (var i = 0; i < stocks.length; i++) {
