@@ -5,11 +5,16 @@
     /* Making sure everything uses border-box sizing*/
 }
 
-.App-header {
+body {
+    background-color: #282c34;
+    color: white;
+}
+
+/* .App-header {
     background-color: #282c34;
     min-height: 100vh;
     color: white;
-}
+} */
 
 .App-Portfolios {
     display: block;
@@ -44,6 +49,14 @@ button:hover {
     font-size: 24px;
 }
 
+.Info-Row{
+    height: 80px;
+}
+
+.Error-Text{
+    color: red;
+}
+
 .Disabled-Button{
     opacity: 0.4;
 }
@@ -60,7 +73,7 @@ button:hover {
     background-color: whitesmoke;
     color: #282c34;
     margin: 20px;
-    width: 90%;
+    width: 800px;
     float: left;
 }
 
@@ -72,11 +85,28 @@ button:hover {
 /* Buttons */
 
 #Portfolio-Board{
-    background-color: lightgray
+    background-color: lightgray;
+}
+
+.Portfolio-Board-Wrapper{
+    height: 100px;
+    overflow: auto;
 }
 
 #Portfolio-Board th{
     background-color: darkgray
+}
+
+table {
+    width: 100%;
+    border: 1px solid lightgray;
+  }
+td {
+    /* padding: 0px; */
+    text-align: center;
+    border-right: 1px solid darkgray;
+    /* border-left: 1px solid darkgray; */
+    border-bottom: 1px solid darkgray 
 }
 
 
