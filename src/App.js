@@ -110,7 +110,7 @@ class App extends Component {
       axios.get(url).then(res => {
         var response = res.data['Realtime Currency Exchange Rate'];
         if (response == null) {
-          this.setErrorText("Error getting exchange rate data from API, probably overused API-key. Add new Portfolio or stock to retry.");
+          this.setErrorText("Error getting exchange rate data from API, probably overused API-key. Wait ~10 seconds and add new Portfolio or stock to retry.");
         } else {
           var exchangeRate = response['5. Exchange Rate'];
           this.setState({ EXCHANGE_RATE_USD_TO_EUR: exchangeRate });
