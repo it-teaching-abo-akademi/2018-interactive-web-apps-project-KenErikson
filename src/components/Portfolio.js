@@ -7,9 +7,10 @@ class Stock extends Component {
     constructor(props) {
         super(props);
         this.DECIMALS = 3;
-        this.state = {
-            selected: false,
-        }
+    }
+
+    toggleSelected() {
+        this.props.toggleSelectedStock(this.props.index);
     }
 
     render() {
@@ -19,6 +20,12 @@ class Stock extends Component {
         if (showingEuros) {
             exchangeRate = this.props.getExchangeRate();
         }
+        // var checkBox;
+        // if (this.props.selected) {
+        //     checkBox = <td><input type="checkbox" onChange={() => this.toggleSelected()} checked /></td>
+        // }else{
+        //     checkBox = <td><input type="checkbox" onChange={() => this.toggleSelected()} /></td>;
+        // }
         console.log("exRate: " + exchangeRate + " €:" + showingEuros);
         return (
             <tr>
@@ -26,7 +33,7 @@ class Stock extends Component {
                 <td>{parseInt(this.props.price * exchangeRate * DIVIDER) / DIVIDER}</td>
                 <td>{this.props.quantity}</td>
                 <td>{parseInt(this.props.price * exchangeRate * this.props.quantity * (DIVIDER)) / (DIVIDER)}</td>
-                <td>No</td>
+                <td><input type="checkbox" name="selected" value="selected" onChange={() => this.toggleSelected()} checked={this.props.selected}/></td>
             </tr>
         );
     }
@@ -49,11 +56,13 @@ class Portfolio extends Component {
                 addStockQuantity: 1,//TODO rename
                 addStockName: "MSFT",//TODO rename
                 title: ("Portfolio " + props.id),
-                stocks: [{
-                    name: "NOK",
-                    price: 0,
-                    quantity: 3
-                }
+                stocks: [
+                    //     {
+                    //     name: "NOK",
+                    //     price: 0,
+                    //     quantity: 3,
+                    //     selected:false,
+                    // }
                 ] //TODO remove
             }
         }
@@ -73,7 +82,7 @@ class Portfolio extends Component {
 
         this.setState(newState);
         this.props.savePortfolio(newState);
-       console.log("new state:" + JSON.stringify(newState));
+        console.log("new state:" + JSON.stringify(newState));
     }
 
     getExchangeRate() {
@@ -118,7 +127,8 @@ class Portfolio extends Component {
 
     addStock(name, addQuantity) {
         var addQuantityInt = parseInt(addQuantity);
-        if (name !== '' && addQuantityInt > 0 && !this.state.getPending) {
+        if (name !== '' && addQuantityInt > 0 && !this.getPending) {
+            this.getPending=true;
             var newStocks = this.state.stocks;
             var exists = false;
             var stockIndex = -1;
@@ -133,6 +143,7 @@ class Portfolio extends Component {
             if (exists) {
                 this.setStock(stockIndex, addQuantityInt, -1);
                 console.log("Changed current stock '" + name + "'");
+                this.getPending = false;
             } else {
                 if (newStocks.length < 50) {
                     const pricesPromise = this.fetchStockData(name);
@@ -142,7 +153,6 @@ class Portfolio extends Component {
                         if (stocks == null) {
                             this.setErrorText("Error getting data from API, probably overused API-key");
                         } else {
-
                             console.log(stocks);
                             var prices = [];
                             for (var i = 0; i < stocks.length; i++) {
@@ -168,7 +178,9 @@ class Portfolio extends Component {
                                         {
                                             name: name,
                                             quantity: addQuantityInt,
-                                            price: 0
+                                            price: 0,
+                                            selected: false,
+                                            index: newStocks.length,
                                         }
                                     );
                                     this.setAndSaveState({
@@ -193,6 +205,7 @@ class Portfolio extends Component {
                                 this.setErrorText("Can't find stock for symbol '" + name + "'");
                             }
                         }
+                        this.getPending=false;
                     })
                         .catch(error => { console.log(error); this.setErrorText("Error during updating stocks: " + error) });
 
@@ -201,7 +214,7 @@ class Portfolio extends Component {
                 }
             }
         } else {
-            this.setErrorText("UNALLOWED Name:" + name + " Quantity:" + addQuantity);
+            this.setErrorText("Unallowed state: (name empty:" + name !== '' + " quantity<1:" + addQuantity<1 + " GET in progress:"+this.getPending);
             console.log("UNALLOWED Name:" + name + " Quantity:" + addQuantity);
         }
     }
@@ -334,7 +347,8 @@ class Portfolio extends Component {
             name: name,
             quantity: oldQuantity + addQuantityInt,
             price: price,
-
+            selected: false,
+            index: stockIndex,
         }
         );
         newStocks.splice(stockIndex, 1, newStock);
@@ -357,6 +371,29 @@ class Portfolio extends Component {
         return parseInt(totalValue * 1000) / 1000.0;
     }
 
+    toggleSelectedStock(i) {
+        const index = i - 1;
+        var stocks = this.state.stocks;
+        var newStock = stocks[i];
+        console.log("i:" + index + " " + JSON.stringify(newStock))
+        console.log("stocks:" + JSON.stringify(stocks))
+        newStock['selected'] = !newStock['selected'];
+        stocks.splice(index, 1, newStock);
+        this.setAndSaveState({ stocks });
+    }
+
+    removeSelected(){
+        var newStocks = this.state.stocks;
+        for(var i = newStocks.length - 1;i>=0;i--){
+            const stockToRemove = newStocks[i];
+            console.log("i:"+i+" Stock:"+JSON.stringify(stockToRemove));
+            if(stockToRemove.selected){
+                newStocks.splice(i,1);
+            }
+        }
+        this.setAndSaveState( {stocks:newStocks});
+    }
+
     render() {
         const userIsEditing = this.state.userIsEditing;
         const userIsAddingStock = this.state.userIsAddingStock;
@@ -369,14 +406,19 @@ class Portfolio extends Component {
             const name = savedStocks[i].name;
             const price = savedStocks[i].price;
             const quantity = savedStocks[i].quantity;
+            const selected = savedStocks[i].selected;
+            console.log("Adding stock: " + name + " i:" + i);
             stocks.push(
                 <Stock
                     key={name}
                     name={name}
                     price={price}
                     quantity={quantity}
+                    selected={selected}
+                    index={i}
                     getExchangeRate={() => this.getExchangeRate()}
                     isShowingEruos={() => this.isShowingEruos()}
+                    toggleSelectedStock={(index) => this.toggleSelectedStock(index)}
                 />
             );
         }
@@ -446,7 +488,7 @@ class Portfolio extends Component {
                 <div className="row">
                     {addStockButton}
                     <button >Perf graph</button>
-                    <button >Remove selected</button>
+                    <button onClick={()=>this.removeSelected()}>Remove selected</button>
                 </div>
             </div>
         );
