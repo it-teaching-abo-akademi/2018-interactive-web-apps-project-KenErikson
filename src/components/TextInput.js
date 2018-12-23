@@ -22,6 +22,7 @@ class TextInput extends Component {
         return (
             <div className="form-group">
                 <input
+                className="Portfolio-Title"
                     type="text"
                     value={text}
                     onChange={evt => this.updateInputValue(evt)}

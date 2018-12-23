@@ -17,14 +17,12 @@
 }
 
 #addPortfolioButton {
-    /* Green */
     padding: 20px 30px;
     margin: 20px;
 }
 
 button {
     background-color: darkolivegreen;
-    /* Green */
     border: none;
     color: white;
     padding: 5px 10px;
@@ -36,6 +34,14 @@ button {
 
 button:hover {
     filter: opacity(0.7);
+}
+
+.bold{
+    font-weight: 800
+}
+
+.large{
+    font-size: 24px;
 }
 
 .Disabled-Button{
@@ -54,13 +60,13 @@ button:hover {
     background-color: whitesmoke;
     color: #282c34;
     margin: 20px;
-    width: 80%;
+    width: 90%;
     float: left;
 }
 
 .Portfolio-Title {
-    margin: 30px;
     font-weight: 1000;
+    font-size: 18px;
 }
 
 /* Buttons */
@@ -83,6 +89,10 @@ button:hover {
 .row{
     width: 100%;
     padding: 10px;
+}
+
+.Add-Stock-Form{
+    display: inline-block;
 }
 
 /*Text Input*/
