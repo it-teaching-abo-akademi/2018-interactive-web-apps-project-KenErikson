@@ -151,7 +151,7 @@ class Portfolio extends Component {
                             }
                             this.getPending = false;
                         })
-                            .catch(error => { console.log(error); this.setErrorText("Error during updating stocks: " + error) });
+                            .catch(error => { console.log(error); this.setErrorText("Error during updating stocks: " + error); this.getPending=false;});
 
                     } else {
                         this.setErrorText("Can't add more unique stock names.");
