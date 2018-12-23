@@ -2,6 +2,7 @@
   "name": "spms",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://it-teaching-abo-akademi.github.io/2018-interactive-web-apps-project-KenErikson/build/",
   "dependencies": {
     "axios": "^0.18.0",
     "react": "^16.6.3",
