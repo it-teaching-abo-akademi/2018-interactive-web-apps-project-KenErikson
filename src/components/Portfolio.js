@@ -1,39 +1,9 @@
 import React, { Component } from 'react';
 import TextInput from './TextInput';
 import TextField from './TextField';
+import Stock from './Stock';
 import axios from 'axios';
 
-class Stock extends Component {
-    constructor(props) {
-        super(props);
-        this.DECIMALS = 3;
-    }
-
-    toggleSelected() {
-        this.props.toggleSelectedStock(this.props.name);
-    }
-
-    render() {
-        const DIVIDER = 10 ** this.DECIMALS;
-        const showingEuros = this.props.isShowingEruos();
-        var exchangeRate = 1;
-        if (showingEuros) {
-            exchangeRate = this.props.getExchangeRate();
-        }
-         return (
-            <tr>
-                <td>{this.props.name}</td>
-                <td>{parseInt(this.props.price * exchangeRate * DIVIDER) / DIVIDER}</td>
-                <td>{this.props.quantity}</td>
-                <td>{parseInt(this.props.price * exchangeRate * this.props.quantity * (DIVIDER)) / (DIVIDER)}</td>
-                <td><input type="checkbox" name="selected" value="selected" onChange={() => this.toggleSelected()} checked={this.props.selected} /></td>
-            </tr>
-        );
-    }
-}
-
-
-//https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT&apikey=PH3K5QD8FR375RC3
 class Portfolio extends Component {
     constructor(props) {
         super(props);
@@ -49,21 +19,12 @@ class Portfolio extends Component {
                 addStockQuantity: 1,
                 addStockName: "",
                 title: ("Portfolio " + props.id),
-                stocks: [
-                    //     {
-                    //     name: "NOK",
-                    //     price: 0,
-                    //     quantity: 3,
-                    //     selected:false,
-                    // }
-                ] //TODO remove
+                stocks: []
             }
         }
     }
 
     setAndSaveState(state) {
-        // console.log("old state:" + JSON.stringify(this.state));
-
         var newState = this.state;
         for (var oldAttr in newState) {
             for (var newAttr in state) {
@@ -75,16 +36,13 @@ class Portfolio extends Component {
 
         this.setState(newState);
         this.props.savePortfolio(newState);
-        // console.log("new state:" + JSON.stringify(newState));
     }
 
     getExchangeRate() {
-        // console.log("getting ExchangeRate: " + this.props.EXCHANGE_RATE_USD_TO_EUR);
         return this.props.EXCHANGE_RATE_USD_TO_EUR;
     }
 
     isShowingEruos() {
-        // console.log("Get is showing €: " + !!this.state.showingEuro);
         return !!this.state.showingEuro;
     }
 
@@ -133,31 +91,25 @@ class Portfolio extends Component {
                         break;
                     }
                 }
-                // console.log("Exists:" + exists + " index:" + stockIndex)
                 if (exists) {
                     this.setStock(stockIndex, addQuantityInt, -1);
-                    // console.log("Changed current stock '" + name + "'");
                     this.getPending = false;
                 } else {
                     if (newStocks.length < 50) {
                         const pricesPromise = this.fetchStockData(name);
                         pricesPromise.then(res => {
-                            // console.log(res.data);
                             var stocks = res.data['Stock Quotes'];
-                            if (stocks == null) {
-                                this.setErrorText("Error getting data from API, probably overused API-key");
+                            if (stocks === null) {
+                                this.setErrorText("Error getting data for '" + name + "' from API, probably overused API-key");
                             } else {
-                                // console.log(stocks);
                                 var prices = [];
                                 for (var i = 0; i < stocks.length; i++) {
                                     const stock = stocks[0];
                                     const name = stock["1. symbol"];
                                     const price = stock["2. price"];
-                                    // console.log(name + ":" + price);
                                     prices.push({ name: name, price: price });
                                 }
                                 if (prices.length === 1) {
-                                    // console.log("length 1");
                                     var exists = false;
                                     var stockIndex = -1;
                                     for (i = 0; i < newStocks.length; i++) {
@@ -172,7 +124,7 @@ class Portfolio extends Component {
                                             {
                                                 name: name,
                                                 quantity: addQuantityInt,
-                                                price: 0,
+                                                price: prices[0].price,
                                                 selected: false,
                                                 index: newStocks.length,
                                             }
@@ -180,10 +132,8 @@ class Portfolio extends Component {
                                         this.setAndSaveState({
                                             stocks: newStocks
                                         });
-                                        // console.log("Added stock '" + name + "'");
                                         this.updateStockPrices();
                                     } else {
-                                        //TODO duplicated code
                                         for (i = 0; i < newStocks.length; i++) {
                                             if (newStocks[i].name === name) {
                                                 exists = true;
@@ -211,22 +161,22 @@ class Portfolio extends Component {
                 this.setErrorText("Adding stock too fast, take a deep breath.");
             }
         } else {
-            this.setErrorText("Unallowed state: (emptyName:" + (name === '') + ", quantity<1:" + (addQuantity < 1) + ")");
+            if(name ===''){
+                this.setErrorText("Can't add stock with empty name");
+            }else{
+                this.setErrorText("Can't add stock with quantity<1");
+            }
         }
     }
 
-    handleChangeStockQuantity(evt) { //TODO better naming of everything
-        this.resetErrorText();
-        // console.log("newValue: " + evt.target.value + " valid:" + evt.target.validity.valid);
+    handleChangeStockQuantity(evt) {
         const addStockQuantity = (evt.target.validity.valid) ? evt.target.value : this.state.addStockQuantity;
         this.setAndSaveState({
             addStockQuantity: addStockQuantity
         })
     }
 
-    handleChangeStockName(evt) { //TODO better naming of everything
-        this.resetErrorText();
-        // console.log("name: " + evt.target.value + " valid:" + evt.target.validity.valid);
+    handleChangeStockName(evt) {
         const addStockName = (evt.target.validity.valid) ? evt.target.value : this.state.addStockName;
         this.setAndSaveState({
             addStockName: addStockName
@@ -236,14 +186,12 @@ class Portfolio extends Component {
     handleAddStockSubmit(evt) {
         this.resetErrorText();
         evt.preventDefault()
-        // console.log(evt.target.name.value + ":" + evt.target.quantity.value);
         const name = evt.target.name.value;
         const quantity = evt.target.quantity.value;
         this.addStock(name, quantity);
     }
 
     getAddStockFields() {
-        //TODO remove AA
         return (
             <div className="row">
                 <form className="Add-Stock-Form" ref="form" onSubmit={(evt) => this.handleAddStockSubmit(evt)}>
@@ -276,19 +224,16 @@ class Portfolio extends Component {
             terms += stocks[i].name;
         }
         if (terms !== "") {
-            // console.log("terms: " + terms);
             const pricesPromise = this.fetchStockData(terms);
             pricesPromise.then(res => {
                 var stocks = res.data['Stock Quotes'];
-                if (stocks == null) {
-                    this.setErrorText("Error getting data from API, probably overused API-key");
+                if (stocks === null) {
+                    this.setErrorText("Error updating all stocks from API, probably overused API-key");
                 } else {
-                    // console.log(stocks);
                     for (var i = 0; i < stocks.length; i++) {
                         const stock = stocks[i];
                         const name = stock["1. symbol"];
                         const price = stock["2. price"];
-                        // console.log(name + ":" + price);
                         this.setUnitValue(name, price);
                     }
                 }
@@ -301,12 +246,10 @@ class Portfolio extends Component {
         var showingEuro = !this.state.showingEuro;
         this.setAndSaveState({ showingEuro: showingEuro });
 
-        /* Force update, TODO move*/
         const stocks = this.state.stocks;
         for (var i = 0; i < stocks.length; i++) {
             this.setStock(i, 0, -1);
         }
-        // console.log("Showing euro: " + showingEuro + " rate: " + this.props.EXCHANGE_RATE_USD_TO_EUR);
     }
 
     setUnitValue(name, price) {
@@ -330,15 +273,12 @@ class Portfolio extends Component {
         var addQuantityInt = parseInt(addQuantity);
         var newStocks = this.state.stocks;
         var existingStock = newStocks[stockIndex];
-        // console.log(JSON.stringify(existingStock));
         const name = existingStock.name;
         const oldQuantity = parseInt(existingStock.quantity);
         const oldPrice = existingStock.price;
         if (price === -1) {
             price = oldPrice;
         }
-        // console.log("Stock:" + JSON.stringify(existingStock));
-        // console.log(name + " is changed to quantity:" + (oldQuantity + addQuantityInt) + " and price:" + price)
         var newStock = ({
             name: name,
             quantity: oldQuantity + addQuantityInt,
@@ -351,8 +291,6 @@ class Portfolio extends Component {
         this.setAndSaveState({
             stocks: newStocks
         });
-        // console.log("Changed current stock '" + name + "'");
-
     }
 
     calculateTotalValue() {
@@ -364,11 +302,10 @@ class Portfolio extends Component {
         if (this.state.showingEuro) {
             totalValue = totalValue * this.props.EXCHANGE_RATE_USD_TO_EUR;
         }
-        return parseInt(totalValue * 1000) / 1000.0;
+        return parseInt(totalValue * 100) / 100.0;
     }
 
     toggleSelectedStock(name) {
-        // const stocks = 
         var stockIndex = -1;
         var found = false;
         var stocks = this.state.stocks;
@@ -381,8 +318,6 @@ class Portfolio extends Component {
             }
         }
         if (found) {
-            // console.log("Index:"+i);
-            console.log("index:" + stockIndex + " " + JSON.stringify(stocks[stockIndex]))
             const newStock = stocks[stockIndex];
             newStock['selected'] = !newStock['selected'];
             stocks.splice(stockIndex, 1, newStock);
@@ -390,15 +325,12 @@ class Portfolio extends Component {
         } else {
             this.setErrorText("Found no stock with name:" + name);
         }
-        // const index = i - 1;
-        // console.log("stocks:" + JSON.stringify(stocks))
     }
 
     removeSelected() {
         var newStocks = this.state.stocks;
         for (var i = newStocks.length - 1; i >= 0; i--) {
             const stockToRemove = newStocks[i];
-            // console.log("i:"+i+" Stock:"+JSON.stringify(stockToRemove));
             if (stockToRemove.selected) {
                 newStocks.splice(i, 1);
             }
@@ -411,15 +343,29 @@ class Portfolio extends Component {
         const userIsAddingStock = this.state.userIsAddingStock;
         var titleField;
         var toggleText;
-
         const savedStocks = this.state.stocks;
+
+        var selectedExists = false;
+        for(var i=0;i<savedStocks.length;i++){
+            if(savedStocks[i].selected){
+                selectedExists = true;
+                break;
+            }
+        }
+
+        var removeSelectedButton;
+        if(selectedExists){
+            removeSelectedButton = <button onClick={() => this.removeSelected()}>Remove selected</button>
+        }else{
+            removeSelectedButton = <button className="Disabled-Button" disabled>Remove selected</button>
+        }
+
         var stocks = [];
-        for (var i = 0; i < savedStocks.length; i++) {
+        for (i = 0; i < savedStocks.length; i++) {
             const name = savedStocks[i].name;
             const price = savedStocks[i].price;
             const quantity = savedStocks[i].quantity;
             const selected = savedStocks[i].selected;
-            // console.log("Adding stock: " + name + " i:" + i);
             stocks.push(
                 <Stock
                     key={name}
@@ -464,7 +410,12 @@ class Portfolio extends Component {
 
         const totalValue = this.calculateTotalValue();
 
-        // Separate tbodies for headers due to react not reading {stocks} correctly otherwise
+        var formHeaderWrapper = "Portfolio-Board-Header-Wrapper";
+        if(stocks.length>4){
+            formHeaderWrapper+=" Portfolio-Board-Scrollbar"
+        }
+
+        // Separate tbodies from headers due to react not reading {stocks} correctly otherwise
         return (
             <div className="App-Portfolio">
                 <div className="row">
@@ -480,17 +431,21 @@ class Portfolio extends Component {
                 </div>
 
                 <div className="row">
+                <div className={formHeaderWrapper}>
+                    <table className="Portfolio-Board">
+                        <tbody>
+                            <tr>
+                                <th className="large-col">Name</th>
+                                <th className="large-col">Unit value</th>
+                                <th className="small-col">Quantity</th>
+                                <th className="large-col">Total value</th>
+                                <th className="small-col">Select</th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                     <div className="Portfolio-Board-Wrapper">
-                        <table id="Portfolio-Board">
-                            <tbody>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Unit value</th>
-                                    <th>Quantity</th>
-                                    <th>Total value</th>
-                                    <th>Select</th>
-                                </tr>
-                            </tbody>
+                        <table className="Portfolio-Board">
                             <tbody>
                                 {stocks}
                             </tbody>
@@ -501,7 +456,7 @@ class Portfolio extends Component {
                 {addStockFields}
                 <div className="row">
                     {addStockButton}
-                    <button onClick={() => this.removeSelected()}>Remove selected</button>
+                    {removeSelectedButton}                    
                 </div>
             </div>
         );

@@ -84,7 +84,7 @@ button:hover {
 
 /* Buttons */
 
-#Portfolio-Board{
+.Portfolio-Board{
     background-color: lightgray;
 }
 
@@ -93,7 +93,24 @@ button:hover {
     overflow: auto;
 }
 
-#Portfolio-Board th{
+.Portfolio-Board-Header-Wrapper{
+    overflow: auto;
+    width: 100%;
+}
+
+.Portfolio-Board-Scrollbar{
+    width: 98%;
+}
+
+.large-col{
+    width: 25%;
+}
+
+.small-col{
+    width: 12.5%;
+}
+
+.Portfolio-Board th{
     background-color: darkgray
 }
 
