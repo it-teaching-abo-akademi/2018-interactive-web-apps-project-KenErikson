@@ -24,6 +24,7 @@ class Portfolio extends Component {
         }
     }
 
+    /** Save updated state in 'this.state' and in local webstorage */
     setAndSaveState(state) {
         var newState = this.state;
         for (var oldAttr in newState) {
@@ -38,14 +39,17 @@ class Portfolio extends Component {
         this.props.savePortfolio(newState);
     }
 
+    /** Get Exchange Rate */
     getExchangeRate() {
         return this.props.EXCHANGE_RATE_USD_TO_EUR;
     }
 
+    /** Get isShowingEuros boolean */
     isShowingEruos() {
         return !!this.state.showingEuro;
     }
 
+    /** Toggle edit Title mode */
     toggleEditing() {
         this.resetErrorText();
         var userIsEditing = !this.state.userIsEditing;
@@ -54,6 +58,7 @@ class Portfolio extends Component {
         });
     }
 
+    /** Toggle add stock mode */
     toggleAddingStock() {
         this.resetErrorText();
         var userIsAddingStock = !this.state.userIsAddingStock;
@@ -62,6 +67,7 @@ class Portfolio extends Component {
         });
     }
 
+    /** Update Title */
     updateTitle(newTitle) {
         this.resetErrorText();
         this.setAndSaveState({
@@ -70,12 +76,14 @@ class Portfolio extends Component {
         })
     }
 
+    /** Fetch stock data from API */
     fetchStockData(terms) {
         const stockUrl = "https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=" + terms + "&apikey=" + this.props.API_KEY;
         console.log(stockUrl);
         return axios.get(stockUrl)
     }
 
+    /** Add Stock */
     addStock(name, addQuantity) {
         var addQuantityInt = parseInt(addQuantity);
         if (name !== '' && addQuantityInt > 0) {
@@ -169,6 +177,7 @@ class Portfolio extends Component {
         }
     }
 
+    /** Check Validity of 'Stock Quantity'-field */
     handleChangeStockQuantity(evt) {
         const addStockQuantity = (evt.target.validity.valid) ? evt.target.value : this.state.addStockQuantity;
         this.setAndSaveState({
@@ -176,6 +185,7 @@ class Portfolio extends Component {
         })
     }
 
+    /** Check Validity of 'Stock Name'-field */
     handleChangeStockName(evt) {
         const addStockName = (evt.target.validity.valid) ? evt.target.value : this.state.addStockName;
         this.setAndSaveState({
@@ -183,6 +193,7 @@ class Portfolio extends Component {
         })
     }
 
+    /** Add Stock and Override normal Submit action */
     handleAddStockSubmit(evt) {
         this.resetErrorText();
         evt.preventDefault()
@@ -191,6 +202,7 @@ class Portfolio extends Component {
         this.addStock(name, quantity);
     }
 
+    /** Get <div> containing 'Add Stock'-fields */
     getAddStockFields() {
         return (
             <div className="row">
@@ -206,14 +218,17 @@ class Portfolio extends Component {
         );
     }
 
+    /** Reset Error Text */
     resetErrorText() {
         this.setAndSaveState({ errorText: "", });
     }
 
+    /** Set Error Text */
     setErrorText(errortext) {
         this.setAndSaveState({ errorText: errortext });
     }
 
+    /** Update All Stock Prices */
     updateStockPrices() {
         const stocks = this.state.stocks;
         var terms = "";
@@ -242,6 +257,7 @@ class Portfolio extends Component {
         }
     }
 
+    /** Toggle Showing Euros */
     toggleShowingEuro() {
         var showingEuro = !this.state.showingEuro;
         this.setAndSaveState({ showingEuro: showingEuro });
@@ -252,6 +268,7 @@ class Portfolio extends Component {
         }
     }
 
+    /** Set Value of one Stock */
     setUnitValue(name, price) {
         var newStocks = this.state.stocks;
         var found = false;
@@ -267,7 +284,7 @@ class Portfolio extends Component {
         }
     }
 
-    /* -1 to keep old price */
+    /* Set Stock data by index, price=-1 to keep old price */
     setStock(stockIndex, addQuantity, price) {
 
         var addQuantityInt = parseInt(addQuantity);
@@ -293,6 +310,7 @@ class Portfolio extends Component {
         });
     }
 
+    /** Calculate Total Value */
     calculateTotalValue() {
         const stocks = this.state.stocks;
         var totalValue = 0;
@@ -305,6 +323,7 @@ class Portfolio extends Component {
         return parseInt(totalValue * 100) / 100.0;
     }
 
+    /** Toggle 'Selected'-state of Stock by name */
     toggleSelectedStock(name) {
         var stockIndex = -1;
         var found = false;
@@ -327,6 +346,7 @@ class Portfolio extends Component {
         }
     }
 
+    /** Remove all 'Selected' stocks */
     removeSelected() {
         var newStocks = this.state.stocks;
         for (var i = newStocks.length - 1; i >= 0; i--) {
@@ -338,13 +358,17 @@ class Portfolio extends Component {
         this.setAndSaveState({ stocks: newStocks });
     }
 
+    /** Render Portfolio */
     render() {
         const userIsEditing = this.state.userIsEditing;
         const userIsAddingStock = this.state.userIsAddingStock;
         var titleField;
         var toggleText;
+        const errorText = this.state.errorText;
         const savedStocks = this.state.stocks;
-
+        const showingEuro = this.state.showingEuro;
+        
+        /** Disable 'Remove Selected' if no stocks selected */
         var selectedExists = false;
         for(var i=0;i<savedStocks.length;i++){
             if(savedStocks[i].selected){
@@ -352,7 +376,6 @@ class Portfolio extends Component {
                 break;
             }
         }
-
         var removeSelectedButton;
         if(selectedExists){
             removeSelectedButton = <button onClick={() => this.removeSelected()}>Remove selected</button>
@@ -360,6 +383,7 @@ class Portfolio extends Component {
             removeSelectedButton = <button className="Disabled-Button" disabled>Remove selected</button>
         }
 
+        /** Parse Stocks from state */
         var stocks = [];
         for (i = 0; i < savedStocks.length; i++) {
             const name = savedStocks[i].name;
@@ -380,8 +404,8 @@ class Portfolio extends Component {
                 />
             );
         }
-        const errorText = this.state.errorText;
-        const showingEuro = this.state.showingEuro;
+
+        /** Make Title editable if in 'userIsEditing'-state */
         if (userIsEditing) {
             toggleText = "Cancel";
             titleField = <TextInput className="Portfolio-Title"
@@ -394,6 +418,7 @@ class Portfolio extends Component {
                 title={this.state.title} />
         }
 
+        /** Add 'Add Stock'-fields if in 'userIsAddingStock'-state */
         var addStockButton = <button onClick={() => this.toggleAddingStock()}>Add Stocks</button>;
         var addStockFields;
         if (userIsAddingStock) {
@@ -401,6 +426,7 @@ class Portfolio extends Component {
             addStockButton = <button className="Disabled-Button" disabled>Add Stocks</button>;
         }
 
+        /** Show Correct Currency */
         var currentlyShowingCurrency = "$";
         var notShowingCurrency = "€";
         if (showingEuro) {
@@ -408,8 +434,10 @@ class Portfolio extends Component {
             notShowingCurrency = "$";
         }
 
+        /** Calculate Total Value */
         const totalValue = this.calculateTotalValue();
 
+        /** Make Table width look correct with and without scrollbar */
         var formHeaderWrapper = "Portfolio-Board-Header-Wrapper";
         if(stocks.length>4){
             formHeaderWrapper+=" Portfolio-Board-Scrollbar"

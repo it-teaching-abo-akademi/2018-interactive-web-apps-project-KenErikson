@@ -4,12 +4,13 @@ import Portfolio from './components/Portfolio'
 import axios from 'axios';
 
 class App extends Component {
+  /* Init state */
   constructor(props) {
     super(props);
 
-    // this.API_KEY = "PH3K5QD8FR375RC3";
+    this.API_KEY = "PH3K5QD8FR375RC3";
     // this.API_KEY = "UFUKA50N6XJ3YQQB";
-    this.API_KEY = "5V5OEOEN5K98E697";
+    // this.API_KEY = "5V5OEOEN5K98E697";
     const localStorageState = JSON.parse(window.localStorage.getItem("saved_state"));
     console.log("Loaded State: " + window.localStorage.getItem("saved_state"));
     if (localStorageState) {
@@ -27,6 +28,7 @@ class App extends Component {
     }
   }
 
+  /* Save Portfolio in state */
   savePortfolio(id, portfolioState) {
     var portfolios = this.state.portfolios;
     for (var i = 0; i < portfolios.length; i++) {
@@ -44,12 +46,13 @@ class App extends Component {
     this.setErrorText("");
   }
 
+  /* Save state to Local storage when any component updates */
   componentDidUpdate() {
     const state = this.state;
-    console.log("Saved State:" + JSON.stringify(state));
     window.localStorage.setItem("saved_state", JSON.stringify(state));
   }
 
+  /** Remove Portfolio by id*/
   removePortfolio(id) {
     var newPortfolioCount = this.state.portfolioCount;
     var newPortfolios = this.state.portfolios;
@@ -77,6 +80,7 @@ class App extends Component {
     );
   }
 
+  /** Add new Portfolio if <10 */
   addPortfolio() {
     const portfolioCount = this.state.portfolioCount;
     var newPortfolios = this.state.portfolios;
@@ -116,14 +120,18 @@ class App extends Component {
         .catch(error => { console.log(error); this.setErrorText("Error during updating exchange rate: " + error) });
     }
   }
+
+  /** Set error text */
   setErrorText(errorText) {
     this.setState({ errorText: errorText })
   }
 
+  /** Set info text */
   setInfoText(infoText) {
     this.setState({ infoText: infoText })
   }
 
+  /** Render App */
   render() {
     if (!this.state.triedInitExchangeRateLoad) {
       this.updateExchangeRate();
@@ -133,6 +141,8 @@ class App extends Component {
     if (portfolioCount > 9) {
       addPortfolioButton = <button className="Disabled-Button" id="addPortfolioButton" disabled>Add Portfolio</button>
     }
+    
+    /** Parse Portfolios from state */
     const portfoliosState = this.state.portfolios;
     const portfolios = [];
     for (var i = 0; i < portfoliosState.length; i++) {

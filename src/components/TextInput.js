@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+/** Generic TextInput */
 class TextInput extends Component {
     constructor(props) {
         super(props);
@@ -7,12 +8,16 @@ class TextInput extends Component {
             inputValue: props.title
         }
     }
+
+    /** Handle Input, disabling default submit action */
     handleInput(evt) {
         evt.preventDefault();
         const newTitle = this.state.inputValue;
         this.props.handleTitle(newTitle);
 
     }
+
+    /** Update Input Value */
     updateInputValue(evt) {
         evt.preventDefault();
         this.setState({
@@ -20,15 +25,7 @@ class TextInput extends Component {
         });
     }
 
-
-    // handleAddStockSubmit(evt) {
-    //     this.resetErrorText();
-    //     evt.preventDefault()
-    //     const name = evt.target.name.value;
-    //     const quantity = evt.target.quantity.value;
-    //     this.addStock(name, quantity);
-    // }
-
+    /** Render Text Input Form */
     render() {
         var text = this.state.inputValue;
         return (
